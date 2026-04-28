@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+
+# VS Code specific
+.vscode/
+.vscode-test/
+*.vsix
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# npm
+package-lock.json
+yarn.lock
+
+# TypeScript
+*.tsbuildinfo

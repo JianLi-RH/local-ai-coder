@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local AI Coder</title>
+    <style>
+        body {
+            font-family: var(--vscode-font-family);
+            padding: 20px;
+            color: var(--vscode-foreground);
+            background-color: var(--vscode-editor-background);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+        .chat-container {
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 4px;
+            padding: 15px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .messages {
+            height: 500px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .user-message {
+            background-color: var(--vscode-textCodeBlock-background);
+            border-left: 3px solid var(--vscode-textLink-foreground);
+        }
+        .ai-message {
+            background-color: var(--vscode-editor-inactiveSelectionBackground);
+            border-left: 3px solid var(--vscode-editorInfo-foreground);
+        }
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .message p {
+            margin: 0 0 8px 0;
+            line-height: 1.6;
+        }
+        .message p:last-child {
+            margin-bottom: 0;
+        }
+        .code-block {
+            background-color: var(--vscode-textCodeBlock-background);
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid var(--vscode-panel-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .code-block code {
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--vscode-editor-foreground);
+            display: block;
+        }
+        .inline-code {
+            background-color: var(--vscode-textCodeBlock-background);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            border: 1px solid var(--vscode-panel-border);
+        }
+        .message strong {
+            font-weight: 600;
+            color: var(--vscode-textLink-foreground);
+        }
+        .message em {
+            font-style: italic;
+            color: var(--vscode-editor-foreground);
+        }
+        .message ul, .message ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        .message li {
+            margin: 6px 0;
+            line-height: 1.6;
+        }
+        .message blockquote {
+            border-left: 4px solid var(--vscode-textLink-foreground);
+            padding: 8px 16px;
+            margin: 12px 0;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 0 4px 4px 0;
+            font-style: italic;
+        }
+        .message a {
+            color: var(--vscode-textLink-foreground);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .message a:hover {
+            border-bottom-color: var(--vscode-textLink-foreground);
+        }
+        .message h1, .message h2, .message h3, .message h4, .message h5, .message h6 {
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+            color: var(--vscode-textLink-foreground);
+        }
+        .message h1 { font-size: 24px; }
+        .message h2 { font-size: 20px; }
+        .message h3 { font-size: 18px; }
+        .message h4 { font-size: 16px; }
+        .message h5 { font-size: 14px; }
+        .message h6 { font-size: 13px; }
+        .message hr {
+            border: none;
+            border-top: 1px solid var(--vscode-panel-border);
+            margin: 20px 0;
+        }
+        .message table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 14px;
+        }
+        .message th, .message td {
+            border: 1px solid var(--vscode-panel-border);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .message th {
+            background-color: var(--vscode-textCodeBlock-background);
+            font-weight: 600;
+        }
+        .input-container {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            background-color: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--vscode-focusBorder);
+        }
+        .send-button {
+            padding: 10px 20px;
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .send-button:hover {
+            background-color: var(--vscode-button-hoverBackground);
+        }
+    </style>
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        function sendMessage(command) {
+            vscode.postMessage({ command: command });
+        }
+
+        function sendChatMessage() {
+            console.log('sendChatMessage called');
+            const input = document.getElementById('chatInput');
+            const message = input ? input.value.trim() : '';
+            if (message) {
+                addMessage('You', message, 'user-message');
+                vscode.postMessage({ command: 'chat', text: message });
+                input.value = '';
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function formatMessage(text) {
+            if (!text) return '';
+            
+            let formatted = text;
+            
+            var bt = String.fromCharCode(96);
+            var cbStart = bt + bt + bt;
+            var cbEnd = bt + bt + bt;
+            
+            formatted = formatted.replace(new RegExp(cbStart + '(\\w+)?\\n([\\s\\S]*?)' + cbEnd, 'g'), function(match, lang, code) {
+                var language = lang || 'plaintext';
+                return '<pre class="code-block"><code class="language-' + language + '">' + escapeHtml(code.trim()) + '</code></pre>';
+            });
+            
+            formatted = formatted.replace(new RegExp(bt + '([^' + bt + ']+)' + bt, 'g'), '<code class="inline-code">$1</code>');
+            
+            formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            
+            formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+            
+            formatted = formatted.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+            formatted = formatted.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+            formatted = formatted.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            
+            formatted = formatted.replace(/^> ?(.+)$/gm, '<blockquote>$1</blockquote>');
+            formatted = formatted.replace(/^---$/gm, '<hr>');
+            
+            formatted = formatted.replace(/^\s*[-*+]\s+(.+)$/gm, '<li>$1</li>');
+            formatted = formatted.replace(/(<li>.+?<\/li>)/g, '<ul>$1</ul>');
+            
+            formatted = formatted.replace(/^\s*\d+\.\s+(.+)$/gm, '<li>$1</li>');
+            formatted = formatted.replace(/(<li>.+?<\/li>)/g, '<ol>$1</ol>');
+            
+            formatted = formatted.replace(/\n/g, '<br>');
+            formatted = formatted.replace(/<ul><\/ul>/g, '');
+            formatted = formatted.replace(/<ol><\/ol>/g, '');
+            formatted = formatted.replace(/<\/ul><ol>/g, '</ul><br><ol>');
+            formatted = formatted.replace(/<\/ol><ul>/g, '</ol><br><ul>');
+            
+            formatted = '<p>' + formatted.replace(/<br><br>/g, '</p><p>') + '</p>';
+            
+            return formatted;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function addMessage(sender, text, className) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + className;
+            messageDiv.innerHTML = '<div class="message-header">' + sender + '</div>' + formatMessage(text);
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        window.addEventListener('message', event => {
+            const message = event.data;
+            if (message.type === 'aiResponse') {
+                addMessage('AI', message.text, 'ai-message');
+            } else if (message.type === 'help') {
+                addMessage('Help', message.text, 'ai-message');
+            } else if (message.type === 'system') {
+                addMessage('System', message.text, 'ai-message');
+            }
+        });
+
+        function initButtons() {
+            var helpBtn = document.getElementById('helpBtn');
+            var configBtn = document.getElementById('configBtn');
+            var exitBtn = document.getElementById('exitBtn');
+            var sendBtn = document.getElementById('sendBtn');
+            var chatInput = document.getElementById('chatInput');
+            
+            if (helpBtn) {
+                helpBtn.addEventListener('click', function() { sendMessage('help'); });
+            }
+            if (configBtn) {
+                configBtn.addEventListener('click', function() { sendMessage('configure'); });
+            }
+            if (exitBtn) {
+                exitBtn.addEventListener('click', function() { sendMessage('exit'); });
+            }
+            if (sendBtn) {
+                sendBtn.addEventListener('click', sendChatMessage);
+            }
+            if (chatInput) {
+                chatInput.addEventListener('keypress', handleKeyPress);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initButtons);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Local AI Coder</h1>
+        
+        <div class="button-group">
+            <button id="helpBtn">Help</button>
+            <button id="configBtn">Configure</button>
+            <button id="exitBtn">Exit</button>
+        </div>
+
+        <div class="chat-container">
+            <div class="messages" id="messages"></div>
+            
+            <div class="input-container">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Enter your message to the AI...">
+                <button class="send-button" id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

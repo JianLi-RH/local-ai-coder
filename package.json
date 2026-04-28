@@ -1,0 +1,114 @@
+{
+  "name": "local-ai-coder",
+  "displayName": "Local AI Coder",
+  "description": "A VS Code extension that uses local AI models to update project code",
+  "version": "1.0.0",
+  "publisher": "Jian Li",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+  ],
+  "main": "out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "local-ai-coder.activate",
+        "title": "Activate Local AI Coder"
+      },
+      {
+        "command": "local-ai-coder.help",
+        "title": "Help - Local AI Coder"
+      },
+      {
+        "command": "local-ai-coder.configure",
+        "title": "Configure Local AI Coder"
+      },
+      {
+        "command": "local-ai-coder.chat",
+        "title": "Chat with Local AI Coder"
+      },
+      {
+        "command": "local-ai-coder.exit",
+        "title": "Exit Local AI Coder"
+      },
+      {
+        "command": "local-ai-coder.updateCode",
+        "title": "Update Selected Code"
+      },
+      {
+        "command": "local-ai-coder.explainCode",
+        "title": "Explain Selected Code"
+      },
+      {
+        "command": "local-ai-coder.fixCode",
+        "title": "Fix Selected Code"
+      }
+    ],
+    "configuration": {
+      "title": "Ollama Coder",
+      "properties": {
+        "ollama-coder.apiBaseUrl": {
+          "type": "string",
+          "default": "http://localhost:11434/v1",
+          "description": "API base URL for Ollama"
+        },
+        "ollama-coder.modelName": {
+          "type": "string",
+          "default": "qwen3-coder:30b",
+          "description": "AI model name to use"
+        },
+        "ollama-coder.apiKey": {
+          "type": "string",
+          "default": "ollama",
+          "description": "API key for Ollama (usually 'ollama' for local instances)"
+        },
+        "ollama-coder.timeout": {
+          "type": "number",
+          "default": 600,
+          "description": "Request timeout in seconds"
+        }
+      }
+    }
+  },
+  "permissions": [
+    "read",
+    "write",
+    "workspace"
+  ],
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./ && npm run copy-assets",
+    "watch": "tsc -watch -p ./",
+    "copy-assets": "copy src\\webview\\panel.html out\\webview\\panel.html",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.45.0",
+    "glob": "^10.3.0",
+    "mocha": "^10.0.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
