@@ -3,7 +3,7 @@
   "displayName": "Local AI Coder",
   "description": "A VS Code extension that uses local AI models to update project code",
   "version": "1.0.0",
-  "publisher": "Jian Li",
+  "publisher": "JianLi",
   "license": "MIT",
   "engines": {
     "vscode": "^1.75.0"
@@ -11,8 +11,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-  ],
+  "activationEvents": [],
   "main": "out/extension.js",
   "contributes": {
     "commands": [
@@ -88,9 +87,10 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./ && npm run copy-assets",
-    "watch": "tsc -watch -p ./",
-    "copy-assets": "cp src/webview/panel.html out/webview/panel.html",
+    "compile": "npm run compile:esbuild && npm run copy-assets",
+    "compile:esbuild": "node esbuild.js --production",
+    "watch": "npm run compile:esbuild -- --watch",
+    "copy-assets": "mkdir -p out/webview && cp src/webview/panel.html out/webview/panel.html",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
@@ -103,6 +103,7 @@
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "@vscode/test-electron": "^2.3.0",
+    "esbuild": "^0.28.0",
     "eslint": "^8.45.0",
     "glob": "^10.3.0",
     "mocha": "^10.0.0",
