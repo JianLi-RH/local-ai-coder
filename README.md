@@ -21,8 +21,9 @@ A VS Code extension that uses local AI models (via Ollama) to update project cod
 
 1. Clone this repository
 2. Run `npm install` to install dependencies
-3. Run `npm run compile` to build the extension
-4. Press `F5` to launch the extension in debug mode
+3. Update copy-assets in package.json against your OS (copy for windows cp for linux)
+4. Run `npm run compile` to build the extension
+5. Press `F5` to launch the extension in debug mode
 
 ## Configuration
 

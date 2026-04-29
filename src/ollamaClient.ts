@@ -29,10 +29,13 @@ export class OllamaClient {
       timeout: this.getTimeout(),
     });
     
-    // 添加拦截器处理认证
+    // Only add authorization header if API key is provided and not empty
     this.client.interceptors.request.use(
       config => {
-        config.headers.Authorization = `Bearer ${this.getApiKey()}`;
+        const apiKey = this.getApiKey();
+        if (apiKey && apiKey.trim() !== '') {
+          config.headers.Authorization = `Bearer ${apiKey}`;
+        }
         return config;
       },
       error => Promise.reject(error)
@@ -57,8 +60,8 @@ export class OllamaClient {
   }
 
   private getApiKey(): string {
-    // Ollama通常不需要API密钥，但某些代理可能需要
-    return vscode.workspace.getConfiguration('ollama-coder').get('apiKey') || 'ollama';
+    // Default to empty string - local Ollama instances typically don't need auth
+    return vscode.workspace.getConfiguration('ollama-coder').get('apiKey') || '';
   }
 
   async generateCompletion(prompt: string, fileContents?: Record<string, string>): Promise<string> {

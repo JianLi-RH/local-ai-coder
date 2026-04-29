@@ -64,8 +64,8 @@
         },
         "ollama-coder.apiKey": {
           "type": "string",
-          "default": "ollama",
-          "description": "API key for Ollama (usually 'ollama' for local instances)"
+          "default": "",
+          "description": "API key for Ollama (leave empty for local instances without auth)"
         },
         "ollama-coder.timeout": {
           "type": "number",
@@ -90,7 +90,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./ && npm run copy-assets",
     "watch": "tsc -watch -p ./",
-    "copy-assets": "copy src\\webview\\panel.html out\\webview\\panel.html",
+    "copy-assets": "cp src/webview/panel.html out/webview/panel.html",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js"
@@ -110,5 +110,9 @@
   },
   "dependencies": {
     "axios": "^1.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JianLi-RH/local-ai-coder.git"
   }
 }
